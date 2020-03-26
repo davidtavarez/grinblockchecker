@@ -1,54 +1,11 @@
 import argparse
+import concurrent.futures as futures
 import datetime
-from typing import Any
-from uuid import uuid4
 
-import requests
 from tqdm import tqdm
 
-import _thread
-
-
-def get_version(foreign_api_url: str) -> str:
-    payload = {
-        "jsonrpc": "2.0",
-        "id": str(uuid4()),
-        "method": "get_version",
-        "params": [],
-    }
-    response = requests.post(foreign_api_url, json=payload)
-    return response.json()["result"]["Ok"]["node_version"]
-
-
-def get_block(foreign_api_url: str, block: int) -> Any:
-    payload = {
-        "jsonrpc": "2.0",
-        "id": str(uuid4()),
-        "method": "get_block",
-        "params": [block, None, None],
-    }
-    block = requests.post(foreign_api_url, json=payload).json()
-    if "Err" in block["result"]:
-        raise ValueError(block["result"]["Err"])
-    return block
-
-
-def get_status(owner_api_url: str) -> Any:
-    payload = {
-        "jsonrpc": "2.0",
-        "id": str(uuid4()),
-        "method": "get_status",
-        "params": [],
-    }
-    response = requests.post(owner_api_url, json=payload)
-
-    return response.json()["result"]["Ok"]
-
-
-def get_latest_block(owner_api) -> int:
-    status = get_status(owner_api)
-    return status["tip"]["height"]
-
+from functions import get_latest_block
+from worker import worker
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
@@ -64,23 +21,29 @@ if __name__ == "__main__":
     parser.add_argument(
         "-o", "--port", help="Node API Port, default: 3413", default="3413",
     )
+    parser.add_argument(
+        "-t", "--threads", help="Number of threads, default: 10", default=10,
+    )
     args = parser.parse_args()
 
-    foreign_url = f"{args.protocol}://{args.address}:" f"{args.port}/v2/foreign"
     owner_url = f"{args.protocol}://{args.address}:" f"{args.port}/v2/owner"
+    latest_block = get_latest_block(owner_url)
+
+    file_name = f"{datetime.datetime.now().timestamp()}.txt"
+    foreign_url = f"{args.protocol}://{args.address}:" f"{args.port}/v2/foreign"
 
     blocks_with_errors: [int] = []
-    latest_block = get_latest_block(owner_url)
     for block_number in tqdm(range(1, latest_block + 1)):
-        try:
-            block_information = get_block(foreign_url, latest_block)
-        except ValueError as ex:
-            blocks_with_errors.append(block_number)
-            print(f"Error with block {block_number}: {ex}")
+        with futures.ThreadPoolExecutor(int(args.threads)) as executor:
+            invalid_block = executor.submit(
+                worker, foreign_url, block_number
+            ).result()
+            if invalid_block:
+                blocks_with_errors.append(invalid_block)
 
     if len(blocks_with_errors):
         ts = datetime.datetime.now().timestamp()
-        f = open(f"{ts}.txt", "w+")
+        f = open(f"{file_name}", "w+")
         for block_number in blocks_with_errors:
             f.write(f"{block_number}\n")
         f.close()
