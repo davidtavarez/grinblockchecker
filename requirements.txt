@@ -7,11 +7,11 @@ click==7.1.1
 idna==2.9
 isort==4.3.21
 pathspec==0.7.0
-progressbar2==3.50.1
 python-utils==2.4.0
 regex==2020.2.20
 requests==2.23.0
 six==1.14.0
 toml==0.10.0
+tqdm==4.43.0
 typed-ast==1.4.1
 urllib3==1.25.8

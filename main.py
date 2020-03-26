@@ -4,6 +4,9 @@ from typing import Any
 from uuid import uuid4
 
 import requests
+from tqdm import tqdm
+
+import _thread
 
 
 def get_version(foreign_api_url: str) -> str:
@@ -68,7 +71,7 @@ if __name__ == "__main__":
 
     blocks_with_errors: [int] = []
     latest_block = get_latest_block(owner_url)
-    for block_number in range(1, latest_block + 1):
+    for block_number in tqdm(range(1, latest_block + 1)):
         try:
             block_information = get_block(foreign_url, latest_block)
         except ValueError as ex:
