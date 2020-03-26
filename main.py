@@ -71,13 +71,13 @@ if __name__ == "__main__":
     for block_number in range(1, latest_block + 1):
         try:
             block_information = get_block(foreign_url, latest_block)
-            print(f"Block found: {block_number}")
         except ValueError as ex:
             blocks_with_errors.append(block_number)
             print(f"Error with block {block_number}: {ex}")
 
-    ts = datetime.datetime.now().timestamp()
-    f = open(f"{ts}.txt", "w+")
-    for block_number in blocks_with_errors:
-        f.write(f"{block_number}\n")
-    f.close()
+    if len(blocks_with_errors):
+        ts = datetime.datetime.now().timestamp()
+        f = open(f"{ts}.txt", "w+")
+        for block_number in blocks_with_errors:
+            f.write(f"{block_number}\n")
+        f.close()
