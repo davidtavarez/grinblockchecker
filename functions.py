@@ -3,6 +3,10 @@ from uuid import uuid4
 
 import requests
 
+import urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
 
 def get_version(foreign_api_url: str) -> str:
     payload = {
@@ -22,7 +26,10 @@ def get_block(foreign_api_url: str, block: int) -> Any:
         "method": "get_block",
         "params": [block, None, None],
     }
-    block = requests.post(foreign_api_url, json=payload).json()
+    response = requests.post(
+        foreign_api_url, json=payload, timeout=5, verify=False
+    )
+    block = response.json()
     if "Err" in block["result"]:
         raise ValueError(block["result"]["Err"])
     return block
