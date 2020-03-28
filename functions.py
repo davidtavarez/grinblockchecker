@@ -13,7 +13,7 @@ from worker import worker
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-COOKIES = {}
+COOKIES = {"ROUTEID": ".1"}
 
 
 def get_version(foreign_api_url: str) -> str:
@@ -28,7 +28,6 @@ def get_version(foreign_api_url: str) -> str:
 
 
 def get_block(foreign_api_url: str, block: int) -> Any:
-    cookies = {"ROUTEID": ".1"}
     payload = {
         "jsonrpc": "2.0",
         "id": str(uuid4()),
@@ -48,7 +47,6 @@ def get_block(foreign_api_url: str, block: int) -> Any:
 
 
 def get_status(owner_api_url: str) -> Any:
-    cookies = {"ROUTEID": ".1"}
     payload = {
         "jsonrpc": "2.0",
         "id": str(uuid4()),
