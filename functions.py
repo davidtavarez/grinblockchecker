@@ -13,7 +13,7 @@ from worker import worker
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-COOKIES = {"ROUTEID": ".1"}
+COOKIES = {}
 
 
 def get_version(foreign_api_url: str) -> str:
@@ -64,7 +64,7 @@ def get_latest_block(owner_api) -> int:
 
 
 def main(latest_block: int, url: str, threads: int):
-    # Create folder to store the invalids
+    # Create a folder to store the invalids
     folder = f"./invalids/{datetime.datetime.now().strftime('%Y%m%d_%H%M%S')}"
     os.mkdir(folder)
 
