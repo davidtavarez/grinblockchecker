@@ -15,19 +15,19 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 
 def get_version(foreign_api_url: str) -> str:
-    headers = {}
+    cookies = {}
     payload = {
         "jsonrpc": "2.0",
         "id": str(uuid4()),
         "method": "get_version",
         "params": [],
     }
-    response = requests.post(foreign_api_url, json=payload, headers=headers)
+    response = requests.post(foreign_api_url, json=payload, cookies=cookies)
     return response.json()["result"]["Ok"]["node_version"]
 
 
 def get_block(foreign_api_url: str, block: int) -> Any:
-    headers = {}
+    cookies = {}
     payload = {
         "jsonrpc": "2.0",
         "id": str(uuid4()),
@@ -35,7 +35,7 @@ def get_block(foreign_api_url: str, block: int) -> Any:
         "params": [block, None, None],
     }
     response = requests.post(
-        foreign_api_url, json=payload, headers=headers, timeout=10, verify=False
+        foreign_api_url, json=payload, cookies=cookies, timeout=10, verify=False
     )
     try:
         block = response.json()
@@ -47,14 +47,14 @@ def get_block(foreign_api_url: str, block: int) -> Any:
 
 
 def get_status(owner_api_url: str) -> Any:
-    headers = {}
+    cookies = {}
     payload = {
         "jsonrpc": "2.0",
         "id": str(uuid4()),
         "method": "get_status",
         "params": [],
     }
-    response = requests.post(owner_api_url, json=payload, headers=headers)
+    response = requests.post(owner_api_url, json=payload, cookies=cookies)
 
     return response.json()["result"]["Ok"]
 
